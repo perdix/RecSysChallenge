@@ -31,14 +31,15 @@ else:
 	outfile = args.o
 
 # Name of the infile
-print(infile)
+#print(infile)
 # Number of tracks to recommend per user
-print(n)
+#print(n)
 # Name of the outfile
-print(outfile)
+#print(outfile)
 
 
 
 # Todo:
 # Do the recommendation and create the result file with name outfile
+print("Recommendations written in "+outfile)
 
