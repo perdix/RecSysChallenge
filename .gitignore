@@ -1,8 +1,8 @@
 # Data
-ir2017.csv
-test.csv
-training.csv
-results.csv
+*.csv
+*.npz
+*.pickle
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

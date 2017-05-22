@@ -7,6 +7,7 @@
 #python recsys.py -i ir2017.csv -n 10 -o results.csv
 
 import argparse
+import ibrec
 
 
 parser = argparse.ArgumentParser()
@@ -22,7 +23,7 @@ if args.i == None:
 else:
 	infile = args.i
 if args.n == None:
-	args.n = 10
+	n = 10
 else:
 	n = int(args.n)
 if args.o == None:
@@ -41,5 +42,6 @@ else:
 
 # Todo:
 # Do the recommendation and create the result file with name outfile
+ibrec.recommend(infile, n, outfile)
 print("Recommendations written in "+outfile)
 
