@@ -13,7 +13,7 @@ tracks_original = pd.read_csv(
 # load additional dataset with track names and artist names that were fetched using the Spotify API
 tracks_metadata = pd.read_csv(
     '../spotify_api_fetcher/tracks_metadata.csv',
-    names=['track','name', 'artist'],
+    names=['track', 'name', 'artist', 'album', 'album_type', 'album_track_number', 'explicit_content', 'popularity'],
     header = 0,
     encoding='utf-8'
 )
@@ -29,4 +29,4 @@ tracks_metadata = tracks_metadata.set_index('track')
 
 # join both datasets and write to csv
 tracks_original_and_metadata = tracks_original.join(tracks_metadata)
-tracks_original_and_metadata.to_csv('../tracks_with_names_utf8.csv', encoding='utf-8')
+tracks_original_and_metadata.to_csv('../tracks_with_metadata.csv', encoding='utf-8')
