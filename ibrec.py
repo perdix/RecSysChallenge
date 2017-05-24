@@ -47,7 +47,7 @@ def fit(csvfile):
 		sys.stdout.write("User: "+str(count)+" --- "+str(len(track_ids))+" tracks \r")
 		sys.stdout.flush()
 		count += 1
-		if len(track_ids) < 100:
+		if len(track_ids) < 500 and len(track_ids) > 30:
 			for track_id in track_ids:
 				#print(track_id_dict[track_id])
 				row = array([track_id for i in track_ids])
@@ -62,13 +62,13 @@ def fit(csvfile):
 
 
 
-def recommend(infile, n, outfile):
+def recommend_to_file(infile, n, outfile):
 
 	# read input file
 	user_dict = {}
 	result_dict = {}
-	test = pd.read_csv(infile)[['user', 'track']]
-	groups = test.groupby('user')
+	training = pd.read_csv(infile)[['user', 'track']]
+	groups = training.groupby('user')
 	for i, group in groups:
 		user_id = group['user'].iloc[0]
 		tracks = set(group['track'])
@@ -112,4 +112,31 @@ def recommend(infile, n, outfile):
 	df.to_csv(outfile, index=False)
 
 
+def recommend(tracks, n):
+
+	with open('track_to_id.pickle', 'rb') as handle:
+		track_id_dict = pickle.load(handle)
+	with open('id_to_track.pickle', 'rb') as handle:
+		id_track_dict = pickle.load(handle)
+
+	track_ids = [track_id_dict[track] for track in tracks if track in track_id_dict]
+	
+	items_sparse = load_npz('items_sparse.npz')
+	size = items_sparse.shape[0]
+
+
+	result_sparse = csr_matrix((1,size), dtype=int8)
+	for track_id in track_ids:
+		row_sparse = items_sparse.getrow(track_id)
+		result_sparse += row_sparse
+
+	indices = result_sparse.nonzero()[1].tolist()
+	values =  result_sparse.data.tolist()
+	zipped = list(zip(indices, values))
+	filtered = list(filter(lambda item: item[0] not in track_ids, zipped))
+	filtered.sort(key=lambda item: item[1], reverse=True)
+	shortened = filtered[:n]
+	result = [id_track_dict[i[0]] for i in shortened]
+
+	return result
 
