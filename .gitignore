@@ -4,6 +4,13 @@
 *.pickle
 .DS_Store
 
+# IDE files
+.idea/
+*.sublime-*
+
+# Others
+.dropbox
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
