@@ -42,6 +42,7 @@ else:
 
 # Todo:
 # Do the recommendation and create the result file with name outfile
-ibrec.recommend(infile, n, outfile)
-print("Recommendations written in "+outfile)
+#ibrec.recommend(infile, n, outfile)
+#print("Recommendations written in "+outfile)
+
 

@@ -10,7 +10,7 @@ import sys
 from scipy.sparse import *
 from scipy import *
 import pickle
-from sklearn.metrics import euclidean_distances
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 
@@ -92,30 +92,58 @@ def recommend_to_file(infile, n, outfile):
 
 def recommend(tracks, n):
 	#result = set()
-	users_sparse = load_npz('items_sparse.npz')
+	users_sparse = load_npz('users_sparse.npz')
 	
 	with open('track_to_id.pickle', 'rb') as handle:
 		track_id_dict = pickle.load(handle)
 	with open('id_to_track.pickle', 'rb') as handle:
 		id_track_dict = pickle.load(handle)
 
-	tracks_size = len(track_id_dict.keys())
+	tracks_size = users_sparse.shape[1]
 
 	track_ids = [track_id_dict[track] for track in tracks]
 
-    row = array([0]*len(track_ids))
+
+
+	row = array([0]*len(track_ids))
 	col = array(track_ids)
 	data = array([1 for i in track_ids])
+
 	input_sparse = csr_matrix( (data,(row,col)), shape=(1,tracks_size), dtype=int16 )
 
-	result_matrix = pairwise_distances(input_sparse, users_sparse)
-	#get best 3, add up and get ids
-	# remove given tracks_ids
+	user_sim = cosine_similarity(input_sparse, users_sparse)
+
+
+	indices = user_sim[0].nonzero()[0].tolist()
+	values = user_sim[0].data.tolist()
 
 
 
+	zipped = list(zip(indices, values))
+	zipped.sort(key=lambda item: item[1], reverse=True)
+	#take best users
+	user_ids = [i[0] for i in zipped[:5]]
 
 
+	#add up
+	result_sparse = csr_matrix( (1,tracks_size), dtype=int8 )
+	for user_id in user_ids:
+	    row_sparse = users_sparse.getrow(user_id)
+	    result_sparse += row_sparse
+
+
+	indices = result_sparse.nonzero()[1].tolist()
+	values =  result_sparse.data.tolist()
+
+	zipped = list(zip(indices, values))
+	filtered = list(filter(lambda item: item[0] not in track_ids, zipped))
+	filtered.sort(key=lambda item: item[1], reverse=True)
+	shortened = filtered[:n]
+
+
+	result = [id_track_dict[i[0]] for i in shortened]    
+
+	return result
 
 
 
