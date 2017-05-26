@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import euclidean_distances
 
-tracks_with_names = pd.read_csv('tracks_with_names.csv', index_col=0)
+tracks_with_names = pd.read_csv('data/tracks_with_names.csv', index_col=0)
 
 track_feature_data = tracks_with_names.drop(['name', 'artist'], axis=1)
 

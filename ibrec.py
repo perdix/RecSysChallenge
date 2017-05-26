@@ -26,9 +26,9 @@ def fit(csvfile):
 		track_id_dict[track] = i
 		id_track_dict[i] = track
 
-	with open('track_to_id.pickle', 'wb') as handle:
+	with open('cache/track_to_id.pickle', 'wb') as handle:
 		pickle.dump(track_id_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)    
-	with open('id_to_track.pickle', 'wb') as handle:
+	with open('cache/id_to_track.pickle', 'wb') as handle:
 		pickle.dump(id_track_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)  
 
 	# generate user track colletions
@@ -55,7 +55,7 @@ def fit(csvfile):
 				data = array([1 for i in track_ids])
 				acc = csr_matrix( (data,(row,col)), shape=(size,size), dtype=int16 )
 				items_sparse += acc
-	save_npz('items_sparse.npz', items_sparse)
+	save_npz('cache/items_sparse.npz', items_sparse)
 		   
 				
 			 
@@ -75,12 +75,12 @@ def recommend_to_file(infile, n, outfile):
 		user_dict[user_id] = tracks
 
 	# get dictionaries and items
-	with open('track_to_id.pickle', 'rb') as handle:
+	with open('cache/track_to_id.pickle', 'rb') as handle:
 		track_id_dict = pickle.load(handle)
-	with open('id_to_track.pickle', 'rb') as handle:
+	with open('cache/id_to_track.pickle', 'rb') as handle:
 		id_track_dict = pickle.load(handle)
 
-	items_sparse = load_npz('items_sparse.npz')
+	items_sparse = load_npz('cache/items_sparse.npz')
 
 
 	for user, tracks in user_dict.items():
@@ -116,14 +116,14 @@ def recommend_to_file(infile, n, outfile):
 
 def recommend(tracks, n):
 
-	with open('track_to_id.pickle', 'rb') as handle:
+	with open('cache/track_to_id.pickle', 'rb') as handle:
 		track_id_dict = pickle.load(handle)
-	with open('id_to_track.pickle', 'rb') as handle:
+	with open('cache/id_to_track.pickle', 'rb') as handle:
 		id_track_dict = pickle.load(handle)
 
 	track_ids = [track_id_dict[track] for track in tracks if track in track_id_dict]
 	
-	items_sparse = load_npz('items_sparse.npz')
+	items_sparse = load_npz('cache/items_sparse.npz')
 	size = items_sparse.shape[0]
 
 

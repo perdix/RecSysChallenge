@@ -1,10 +1,4 @@
 # Data
-data/*
-!data/.gitkeep
-cache/*
-!cache/.gitkeep
-tmp/*
-!tmp/.gitkeep
 *.csv
 *.npz
 *.pickle

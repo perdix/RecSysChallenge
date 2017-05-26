@@ -16,7 +16,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 def fit(csvfile):
  	# read training set
-	training = pd.read_csv("csvfile")[['user', 'track']]
+	training = pd.read_csv(csvfile)[['user', 'track']]
 	training.head()
 
 
@@ -45,14 +45,14 @@ def fit(csvfile):
 	    id_user_dict[i] = user
 	    
 	    
-	with open('track_to_id.pickle', 'wb') as handle:
+	with open('cache/track_to_id.pickle', 'wb') as handle:
 	    pickle.dump(track_id_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)    
-	with open('id_to_track.pickle', 'wb') as handle:
+	with open('cache/id_to_track.pickle', 'wb') as handle:
 	    pickle.dump(id_track_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)     
 	    
-	with open('user_to_id.pickle', 'wb') as handle:
+	with open('cache/user_to_id.pickle', 'wb') as handle:
 	    pickle.dump(user_id_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)    
-	with open('id_to_user.pickle', 'wb') as handle:
+	with open('cache/id_to_user.pickle', 'wb') as handle:
 	    pickle.dump(id_user_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)  
 
 	# Create user dict
@@ -81,7 +81,7 @@ def fit(csvfile):
 	            acc = csr_matrix( (data,(row,col)), shape=(users_size,tracks_size), dtype=int16 )
 	            users_sparse += acc   
 
-	save_npz('users_sparse.npz', users_sparse)
+	save_npz('cache/users_sparse.npz', users_sparse)
 
 
 def recommend_to_file(infile, n, outfile):
@@ -92,11 +92,11 @@ def recommend_to_file(infile, n, outfile):
 
 def recommend(tracks, n):
 	#result = set()
-	users_sparse = load_npz('users_sparse.npz')
+	users_sparse = load_npz('cache/users_sparse.npz')
 	
-	with open('track_to_id.pickle', 'rb') as handle:
+	with open('cache/track_to_id.pickle', 'rb') as handle:
 		track_id_dict = pickle.load(handle)
-	with open('id_to_track.pickle', 'rb') as handle:
+	with open('cache/id_to_track.pickle', 'rb') as handle:
 		id_track_dict = pickle.load(handle)
 
 	tracks_size = users_sparse.shape[1]
