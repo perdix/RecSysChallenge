@@ -7,7 +7,8 @@
 #python recsys.py -i ir2017.csv -n 10 -o results.csv
 
 import argparse
-import ibrec
+import recommender_cf_item_based
+import recommender_cf_user_based
 
 
 parser = argparse.ArgumentParser()
@@ -19,17 +20,17 @@ parser.add_argument("-o", help="Name of the outfile")
 # Read the arguments and
 args = parser.parse_args()
 if args.i == None:
-	infile = 'ir2017.csv'
+    infile = 'ir2017.csv'
 else:
-	infile = args.i
+    infile = args.i
 if args.n == None:
-	n = 10
+    n = 10
 else:
-	n = int(args.n)
+    n = int(args.n)
 if args.o == None:
-	outfile = 'results.csv'		
+    outfile = 'results.csv'
 else:
-	outfile = args.o
+    outfile = args.o
 
 # Name of the infile
 #print(infile)
@@ -42,7 +43,8 @@ else:
 
 # Todo:
 # Do the recommendation and create the result file with name outfile
-#ibrec.recommend(infile, n, outfile)
-#print("Recommendations written in "+outfile)
+recommender_cf_item_based.recommend_to_file(infile, n, outfile)
+#recommender_cf_user_based.recommend_to_file(infile, n, outfile)
+print("Recommendations written in "+outfile)
 
 
