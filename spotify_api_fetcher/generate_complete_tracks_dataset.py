@@ -5,12 +5,18 @@
 import pandas as pd
 
 # load original dataset
-tracks_original = pd.read_csv(
-    '../tracks_unique.csv',
-    index_col=0
-)
+plays = pd.read_csv('../data/ir2017.csv')
 
-# load additional dataset with track names and artist names that were fetched using the Spotify API
+# add play_count column to dataframe
+plays_per_track = plays.groupby('track').size().to_frame('play_count')
+plays_with_play_count = plays.set_index('track').join(plays_per_track).reset_index()
+
+# unique tracks
+tracks = plays_with_play_count.drop('user', axis=1).drop_duplicates(subset='track').set_index('track')
+
+
+
+# load additional dataset with track metadata like track and artist names (fetched using the Spotify API)
 tracks_metadata = pd.read_csv(
     '../spotify_api_fetcher/tracks_metadata.csv',
     names=['track', 'name', 'artist', 'album', 'album_type', 'album_track_number', 'explicit_content', 'popularity'],
@@ -28,5 +34,5 @@ tracks_metadata = tracks_metadata.drop_duplicates(subset='track')
 tracks_metadata = tracks_metadata.set_index('track')
 
 # join both datasets and write to csv
-tracks_original_and_metadata = tracks_original.join(tracks_metadata)
-tracks_original_and_metadata.to_csv('../tracks_with_metadata.csv', encoding='utf-8')
+tracks_with_metadata = tracks.join(tracks_metadata)
+tracks_with_metadata.to_csv('../data/tracks_with_metadata.csv', encoding='utf-8')
