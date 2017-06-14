@@ -11,6 +11,7 @@ from scipy.sparse import *
 from scipy import *
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.decomposition import TruncatedSVD
 
 
 
@@ -79,8 +80,16 @@ def fit(csvfile):
 	            col = array(track_ids)
 	            data = array([1 for i in track_ids])
 	            acc = csr_matrix( (data,(row,col)), shape=(users_size,tracks_size), dtype=int16 )
-	            users_sparse += acc   
+	            users_sparse += acc  
 
+	# Apply SVD (dimensionality reduction to 300)
+	svd = TruncatedSVD(n_components=300)
+	svd.fit(users_sparse)
+	users_reduced = svd.transform(users_sparse)
+
+	with open('cache/users_svd.pickle', 'wb') as handle:
+		pickle.dump(svd, handle, protocol=pickle.HIGHEST_PROTOCOL)  
+	np.save('cache/users_reduced.npy', users_reduced)
 	save_npz('cache/users_sparse.npz', users_sparse)
 
 
@@ -93,11 +102,18 @@ def recommend_to_file(infile, n, outfile):
 def recommend(tracks, n):
 	#result = set()
 	users_sparse = load_npz('cache/users_sparse.npz')
-	
+	users_reduced = np.load('cache/users_reduced.npy')
+
+
 	with open('cache/track_to_id.pickle', 'rb') as handle:
 		track_id_dict = pickle.load(handle)
 	with open('cache/id_to_track.pickle', 'rb') as handle:
 		id_track_dict = pickle.load(handle)
+	with open('cache/users_svd.pickle', 'rb') as handle:
+		svd = pickle.load(handle)
+
+
+
 
 	tracks_size = users_sparse.shape[1]
 
@@ -105,26 +121,25 @@ def recommend(tracks, n):
 
 
 
+
 	row = array([0]*len(track_ids))
 	col = array(track_ids)
 	data = array([1 for i in track_ids])
 
-	input_sparse = csr_matrix( (data,(row,col)), shape=(1,tracks_size), dtype=int16 )
+	user_sparse = csr_matrix( (data,(row,col)), shape=(1,tracks_size), dtype=int16 )
+	user_reduced = svd.transform(user_sparse)
 
-	user_sim = cosine_similarity(input_sparse, users_sparse)
+	user_sim = cosine_similarity(user_reduced, users_reduced)
+
+	print(user_sim)
 
 
 	indices = user_sim[0].nonzero()[0].tolist()
 	values = user_sim[0].data.tolist()
-
-
-
 	zipped = list(zip(indices, values))
 	zipped.sort(key=lambda item: item[1], reverse=True)
-	#take best users
-	user_ids = [i[0] for i in zipped[:5]]
-
-
+	#take best 25 users 
+	user_ids = [i[0] for i in zipped[:25]]
 	#add up
 	result_sparse = csr_matrix( (1,tracks_size), dtype=int8 )
 	for user_id in user_ids:
