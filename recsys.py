@@ -7,8 +7,36 @@
 #python recsys.py -i ir2017.csv -n 10 -o results.csv
 
 import argparse
-import recommender_cf_item_based
 import recommender_cf_user_based
+import recommender_content_based
+import recommender_album_based
+import pandas as pd
+from pathlib import Path
+from collections import Counter
+
+
+# Helper method
+def predict(tracks):
+	result_counter = Counter()
+	
+	ub_result = recommender_cf_user_based.recommend(tracks, 10*n)
+	for track, count in ub_result:
+		result_counter.update({track: count})
+
+	cb_result = recommender_content_based.recommend(tracks, 10*n)
+	for track, count in cb_result:
+		result_counter.update({track: count})
+
+	album_result = recommender_album_based.recommend(tracks, 10*n)
+	for track, count in album_result:
+		result_counter.update({track: count})
+
+	result = [i[0] for i in result_counter.most_common(n)] 
+	return result
+
+
+
+
 
 
 parser = argparse.ArgumentParser()
@@ -32,19 +60,49 @@ if args.o == None:
 else:
     outfile = args.o
 
-# Name of the infile
-#print(infile)
-# Number of tracks to recommend per user
-#print(n)
-# Name of the outfile
-#print(outfile)
+
+# Training
+users_reduced = Path('cache/users_reduced.npy')
+if not users_reduced.exists():
+	print("---- Training Start ----")
+	recommender_cf_user_based.fit(infile)
+	print("---- Training End ----")
+else:
+	print("---- Already Trained ----")
+
+
+# Predicting
+user_dict_predict = {}
+user_dict_result = {}
+
+print("---- Prediction Start ----")
+plays = pd.read_csv(infile)
+groups = plays.groupby('user')
+for i, group in groups:
+    user = group['user'].iloc[0]
+    tracks = set(group['track'])
+    user_dict_predict[user] = tracks
+
+count = 0
+for user, tracks in user_dict_predict.items():
+	user_dict_result[user] = predict(tracks)
+	count += 1
+	print(count)
+print("---- Prediction End ----")
+
+
+# Write Prediction to File
+df = pd.DataFrame(columns=['track', 'user'])
+for user, tracks in user_dict_result.items():
+	size = len(tracks)
+	new = pd.DataFrame({'user':[user]*size,'track':tracks})
+	df = df.append(new)
+df.to_csv(outfile, index=False)
+print("---- Predicton Saved To File ----")
 
 
 
-# Todo:
-# Do the recommendation and create the result file with name outfile
-recommender_cf_item_based.recommend_to_file(infile, n, outfile)
-#recommender_cf_user_based.recommend_to_file(infile, n, outfile)
-print("Recommendations written in "+outfile)
+
+
 
 

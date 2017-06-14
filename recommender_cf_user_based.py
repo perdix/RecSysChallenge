@@ -18,7 +18,7 @@ from sklearn.decomposition import TruncatedSVD
 def fit(csvfile):
  	# read training set
 	training = pd.read_csv(csvfile)[['user', 'track']]
-	training.head()
+
 
 
 	tracks = training['track'].unique()
@@ -83,7 +83,7 @@ def fit(csvfile):
 	            users_sparse += acc  
 
 	# Apply SVD (dimensionality reduction to 300)
-	svd = TruncatedSVD(n_components=300)
+	svd = TruncatedSVD(n_components=300, algorithm='arback')
 	svd.fit(users_sparse)
 	users_reduced = svd.transform(users_sparse)
 
@@ -93,8 +93,8 @@ def fit(csvfile):
 	save_npz('cache/users_sparse.npz', users_sparse)
 
 
-def recommend_to_file(infile, n, outfile):
-	print("not yet implemented")
+#def recommend_to_file(infile, n, outfile):
+#	print("not yet implemented")
 
 
 
@@ -118,7 +118,6 @@ def recommend(tracks, n):
 	tracks_size = users_sparse.shape[1]
 
 	track_ids = [track_id_dict[track] for track in tracks]
-
 
 
 
@@ -153,11 +152,7 @@ def recommend(tracks, n):
 	zipped = list(zip(indices, values))
 	filtered = list(filter(lambda item: item[0] not in track_ids, zipped))
 	filtered.sort(key=lambda item: item[1], reverse=True)
-	shortened = filtered[:n]
-
-
-	result = [id_track_dict[i[0]] for i in shortened]    
-
+	result = filtered[:n]   
 	return result
 
 
