@@ -13,6 +13,8 @@ import sys
 
 def recommend(tracks, n):
 
+    tracks = list(tracks)[:1000]
+
     s = requests.Session()
 
     # Get spotify token with client id und client secret
@@ -29,7 +31,7 @@ def recommend(tracks, n):
     #print(access_token)
 
     # Wait to get sure response is there (not nice but quick solution)
-    time.sleep(1)
+    #time.sleep(0.5)
 
     # Fetch Spotify API
     url_track = 'https://api.spotify.com/v1/tracks/?ids='
@@ -39,6 +41,7 @@ def recommend(tracks, n):
         'Authorization': 'Bearer ' + access_token
     }
     
+    #print("get albums")
 
 
     tracks = [track.replace('spotify:track:', '') for track in tracks]
@@ -66,7 +69,7 @@ def recommend(tracks, n):
             sys.stdout.write(response.json())
             sys.stdout.flush()
 
-
+    #print("get related tracks")
 
     albums_in_chunks_of_20 = [albums[i:i + 20] for i in range(0, len(albums), 20)]
     for chunk_number, chunk in enumerate(albums_in_chunks_of_20):
@@ -81,9 +84,9 @@ def recommend(tracks, n):
             sys.stdout.write(response.json())
             sys.stdout.flush()
 
-    time.sleep(5)
-
-    result = result_counter.most_common(n)
-    return result 
+    #time.sleep(5)
+    result = result_counter.most_common()
+    filtered = list(filter(lambda item: item[0] not in tracks, result))
+    return filtered[:n]
 
 

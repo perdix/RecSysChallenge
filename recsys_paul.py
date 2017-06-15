@@ -8,24 +8,26 @@
 
 import argparse
 import recommender_cf_user_based
-import recommender_content_based
+#import recommender_content_based
 import recommender_album_based
 import pandas as pd
 from pathlib import Path
 from collections import Counter
 import sys
 
+
 # Helper method
 def predict(tracks):
+
 	result_counter = Counter()
 	
 	ub_result = recommender_cf_user_based.recommend(tracks, 10*n)
 	for track, count in ub_result:
 		result_counter.update({track: count})
 
-	cb_result = recommender_content_based.recommend(tracks, 10*n)
-	for track, count in cb_result:
-		result_counter.update({track: count})
+	# cb_result = recommender_content_based.recommend(tracks, 10*n)
+	# for track, count in cb_result:
+	# 	result_counter.update({track: count})
 
 	album_result = recommender_album_based.recommend(tracks, 10*n)
 	for track, count in album_result:
@@ -33,7 +35,6 @@ def predict(tracks):
 
 	result = [i[0] for i in result_counter.most_common(n)] 
 	return result
-
 
 
 
@@ -61,7 +62,7 @@ else:
     outfile = args.o
 
 
-# Training
+#Training
 users_reduced = Path('cache/users_reduced.npy')
 if not users_reduced.exists():
 	print("---- Training Start ----")
@@ -85,10 +86,10 @@ for i, group in groups:
 
 count = 0
 for user, tracks in user_dict_predict.items():
-	user_dict_result[user] = predict(tracks)
 	count += 1
 	sys.stdout.write("User: "+str(count)+"#"+str(len(tracks))+"\r")
 	sys.stdout.flush()
+	user_dict_result[user] = predict(tracks)
 print("---- Prediction End ----")
 
 
@@ -100,6 +101,7 @@ for user, tracks in user_dict_result.items():
 	df = df.append(new)
 df.to_csv(outfile, index=False)
 print("---- Predicton Saved To File ----")
+
 
 
 
