@@ -13,7 +13,7 @@ import recommender_album_based
 import pandas as pd
 from pathlib import Path
 from collections import Counter
-
+import sys
 
 # Helper method
 def predict(tracks):
@@ -87,7 +87,8 @@ count = 0
 for user, tracks in user_dict_predict.items():
 	user_dict_result[user] = predict(tracks)
 	count += 1
-	print(count)
+	sys.stdout.write("User: "+str(count)+"\r")
+	sys.stdout.flush()
 print("---- Prediction End ----")
 
 

@@ -73,7 +73,7 @@ def fit(csvfile):
 	    sys.stdout.write("User: "+str(count)+"\r")
 	    sys.stdout.flush()
 	    count += 1
-	    if len(track_ids) < 500 and len(track_ids) > 25:
+	    if len(track_ids) < 2000 and len(track_ids) > 1:
 	        for track_id in track_ids:
 	            #print(track_id_dict[track_id])
 	            row = array([user_id for i in track_ids])
@@ -83,7 +83,7 @@ def fit(csvfile):
 	            users_sparse += acc  
 
 	# Apply SVD (dimensionality reduction to 300)
-	svd = TruncatedSVD(n_components=300, algorithm='arback')
+	svd = TruncatedSVD(n_components=50, algorithm='arpack')
 	svd.fit(users_sparse)
 	users_reduced = svd.transform(users_sparse)
 
@@ -130,7 +130,7 @@ def recommend(tracks, n):
 
 	user_sim = cosine_similarity(user_reduced, users_reduced)
 
-	print(user_sim)
+	#print(user_sim)
 
 
 	indices = user_sim[0].nonzero()[0].tolist()
@@ -149,7 +149,9 @@ def recommend(tracks, n):
 	indices = result_sparse.nonzero()[1].tolist()
 	values =  result_sparse.data.tolist()
 
-	zipped = list(zip(indices, values))
+	tracks = [id_track_dict[i] for i in indices]
+
+	zipped = list(zip(tracks, values))
 	filtered = list(filter(lambda item: item[0] not in track_ids, zipped))
 	filtered.sort(key=lambda item: item[1], reverse=True)
 	result = filtered[:n]   

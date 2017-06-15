@@ -8,6 +8,7 @@ from collections import Counter
 import requests
 import base64
 import time
+import sys
 
 
 def recommend(tracks, n):
@@ -62,7 +63,8 @@ def recommend(tracks, n):
             for track in json['tracks']:
                 albums.append(track['album']['id'])
         else:
-            print(response.json())
+            sys.stdout.write(response.json())
+            sys.stdout.flush()
 
 
 
@@ -76,7 +78,8 @@ def recommend(tracks, n):
                 album_tracks = [ 'spotify:track:'+i['id'] for i in album['tracks']['items'] ]
                 result_counter.update(album_tracks)
         else:
-            print(response.json())
+            sys.stdout.write(response.json())
+            sys.stdout.flush()
 
     time.sleep(5)
 
